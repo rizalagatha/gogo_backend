@@ -33,14 +33,8 @@ async function getKegiatanDetail(kegiatanId) {
 
     // Query 1: Get main activity data
     const mainSql = `
-            SELECT 
-                a.noplat, 
-                a.tujuan, 
-                IF(a.isplan=0, 'Terjadwal', 'Tidak Terjadwal') as status, 
-                a.keterangan, 
-                b.kar_nama as namaDriver,
-                a.note,
-                a.pd_nomor -- <-- Kolom ini tetap penting untuk join
+            SELECT a.noplat, a.tujuan, IF(a.isplan=0, 'Terjadwal', 'Tidak Terjadwal') as status, 
+                   a.keterangan, b.kar_nama as namaDriver, a.note
             FROM tkegiatan a 
             INNER JOIN tkaryawan b ON a.kar_kode = b.kar_kode 
             WHERE a.id = ?
@@ -49,16 +43,7 @@ async function getKegiatanDetail(kegiatanId) {
     const pdNomor = mainData.pd_nomor;
 
     // Query 2: Get sub-details
-    const sql_details = `
-        SELECT 
-                id, 
-                customer, 
-                jam,
-                latitude,
-                longitude
-            FROM tkegiatan_dtl 
-            WHERE header_id = ?
-        `;
+    const sql_details =`SELECT id, customer, jam FROM tkegiatan_dtl WHERE header_id = ?`
     const [sub_details_rows] = await connection.execute(sql_details, [kegiatanId]);
 
     await connection.end();

@@ -42,13 +42,13 @@ async function getOpenJobsByKaryawan(karKode) {
     // Query untuk mengambil kegiatan yang "sedang berjalan" atau siap diupdate
     const sql = `
         SELECT 
-            a.pd_nomor as id,
-            CONCAT(a.pd_customer, ' => ', a.pd_uraian) as tujuan
+            b.id, -- <-- Mengambil ID dari tkegiatan (INT)
+            a.pd_uraian as tujuan
         FROM tpermintaandriver a
-        JOIN tkaryawan b ON a.pd_driver = b.kar_nama 
-        WHERE b.kar_kode = ?  
+        JOIN tkegiatan b ON a.pd_nomor = b.pd_nomor -- Join berdasarkan pd_nomor
+        WHERE b.kar_kode = ?
         AND a.pd_isClosed = 2
-        ORDER BY a.pd_tglKerja DESC
+        ORDER BY b.tanggal DESC
     `;
 
     try {
