@@ -47,8 +47,8 @@ async function getOpenJobsByKaryawan(karKode) {
             a.pd_customer as customer,
             a.pd_tipejadwal as status,
             c.noplat as noplat,
-            DATE_FORMAT(a.pd_tglkerja, '%d-%m-%Y') as tglKerja, -- <-- Ambil tanggal
-            a.pd_jamkerja as jamKerja                           -- <-- Ambil jam
+            DATE_FORMAT(a.pd_tglkerja, '%d-%m-%Y') as tglKerja, 
+            a.pd_jamkerja as jamKerja                           
         FROM tpermintaandriver a
         JOIN tkaryawan b ON a.pd_driver = b.kar_nama
         JOIN tkegiatan c ON a.pd_nomor = c.nomor_minta
