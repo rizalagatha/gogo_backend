@@ -70,7 +70,7 @@ async function getKegiatanDetail(req, res) {
     try {
         const result = await kegiatanService.getKegiatanDetail(kegiatanId);
 
-        if (result.main_data) {
+        if (result && result.main_data) {
             res.json({
                 success: true,
                 main_data: result.main_data,
@@ -84,6 +84,7 @@ async function getKegiatanDetail(req, res) {
         res.status(500).json({ success: false, message: 'Gagal mengambil detail kegiatan' });
     }
 }
+
 
 async function getKegiatanInfo(req, res) {
     const kegiatanId = req.params.id;

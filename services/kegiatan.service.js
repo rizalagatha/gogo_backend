@@ -31,9 +31,10 @@ async function getCheckoutFormData(userKode, nomorMinta) {
 async function getKegiatanDetail(kegiatanId) {
     const connection = await mysql.createConnection(dbConfig);
     try {
-        // Query 1: Ambil data utama (tidak perlu diubah)
+        // Query 1: ambil main data + pd_nomor
         const mainSql = `
-            SELECT a.noplat, a.tujuan, IF(a.isplan=0, 'Terjadwal', 'Tidak Terjadwal') as status, 
+            SELECT a.id, a.pd_nomor, a.noplat, a.tujuan, 
+                   IF(a.isplan=0, 'Terjadwal', 'Tidak Terjadwal') as status, 
                    a.keterangan, b.kar_nama as namaDriver
             FROM tkegiatan a 
             INNER JOIN tkaryawan b ON a.kar_kode = b.kar_kode 
@@ -43,11 +44,15 @@ async function getKegiatanDetail(kegiatanId) {
         if (mainRows.length === 0) return null;
 
         const mainData = mainRows[0];
-        const pdNomor = mainData.pd_nomor;
+        const pdNomor = mainData.pd_nomor; // ini yang dipakai untuk ambil detail
 
-        // Query 2: Ambil sub-detail dengan header_id (INT) yang cocok
-        const subSql = `SELECT id, customer, jam, latitude, longitude, foto FROM tkegiatan_dtl WHERE header_id = ?`;
-        const [subRows] = await connection.execute(subSql, [pdNomor || null]);
+        // Query 2: ambil sub-detail berdasarkan pd_nomor
+        const subSql = `
+            SELECT id, customer, jam, latitude, longitude, foto
+            FROM tkegiatan_dtl
+            WHERE header_id = ?
+        `;
+        const [subRows] = await connection.execute(subSql, [pdNomor]);
 
         return { main_data: mainData, sub_details: subRows };
     } finally {
