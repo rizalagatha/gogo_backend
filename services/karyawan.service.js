@@ -42,7 +42,7 @@ async function getOpenJobsByKaryawan(karKode) {
     // Query untuk mengambil kegiatan yang "sedang berjalan" atau siap diupdate
     const sql = `
         SELECT 
-            a.id,
+            a.pd_nomor,
             a.tujuan,
             DATE_FORMAT(a.tanggal, '%d-%m-%Y') as tanggal,
             a.jamawal as jam
