@@ -31,34 +31,47 @@ async function getCheckoutFormData(userKode, nomorMinta) {
 async function getKegiatanDetail(kegiatanId) {
     const connection = await mysql.createConnection(dbConfig);
     try {
-        // Query 1: ambil main data + pd_nomor
+        // Query utama: gabung tkegiatan + tkaryawan + tpermintaandriver
         const mainSql = `
-            SELECT a.id, a.pd_nomor, a.noplat, a.tujuan, 
-                   IF(a.isplan=0, 'Terjadwal', 'Tidak Terjadwal') as status, 
-                   a.keterangan, b.kar_nama as namaDriver
-            FROM tkegiatan a 
-            INNER JOIN tkaryawan b ON a.kar_kode = b.kar_kode 
+            SELECT 
+                a.id,
+                a.nomor_minta,
+                a.noplat,
+                a.tujuan,
+                IF(a.isplan=0, 'Terjadwal', 'Tidak Terjadwal') AS status,
+                a.keterangan,
+                b.kar_nama AS namaDriver,
+                c.pd_nomor,
+                c.tanggal AS tglPermintaan,
+                c.pemohon,
+                c.departemen
+            FROM tkegiatan a
+            INNER JOIN tkaryawan b ON a.kar_kode = b.kar_kode
+            LEFT JOIN tpermintaandriver c ON a.nomor_minta = c.pd_nomor
             WHERE a.id = ?
         `;
         const [mainRows] = await connection.execute(mainSql, [kegiatanId]);
         if (mainRows.length === 0) return null;
 
         const mainData = mainRows[0];
-        const pdNomor = mainData.pd_nomor; // ini yang dipakai untuk ambil detail
 
-        // Query 2: ambil sub-detail berdasarkan pd_nomor
+        // Tentukan id yang dipakai untuk ambil sub-detail
+        const headerKey = mainData.pd_nomor || mainData.nomor_minta || mainData.id;
+
+        // Query detail
         const subSql = `
             SELECT id, customer, jam, latitude, longitude, foto
             FROM tkegiatan_dtl
             WHERE header_id = ?
         `;
-        const [subRows] = await connection.execute(subSql, [pdNomor]);
+        const [subRows] = await connection.execute(subSql, [headerKey]);
 
         return { main_data: mainData, sub_details: subRows };
     } finally {
         await connection.end();
     }
 }
+
 
 async function getKegiatanInfo(kegiatanId) {
     const connection = await mysql.createConnection(dbConfig);
