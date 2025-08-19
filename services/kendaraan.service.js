@@ -1,0 +1,73 @@
+// services/kendaraan.service.js
+
+const mysql = require('mysql2/promise');
+const dbConfig = require('../config/db.config');
+
+// Fungsi untuk mengambil semua nomor plat kendaraan
+async function getAllNoplat() {
+    const connection = await mysql.createConnection(dbConfig);
+    
+    const sql = "SELECT noplat FROM tkendaraan ORDER BY noplat";
+    
+    const [rows] = await connection.execute(sql);
+
+    await connection.end();
+
+    // Mengubah array objek menjadi array string, mirip PDO::FETCH_COLUMN
+    return rows.map(row => row.noplat);
+}
+
+async function getHistoryPerawatan(noplat, startDate, endDate) {
+    const connection = await mysql.createConnection(dbConfig);
+
+    const sql = `
+        SELECT 
+            a.id, 
+            IFNULL(b.jenis_perawatan, 'Lainnya') as tujuan,
+            CONCAT(
+                'Tanggal : ', a.tanggal,
+                ' Bengkel : ', a.bengkel,
+                '\\r\\n',
+                'Biaya : ', FORMAT(a.biaya, 0),
+                ' KM : ', a.KM
+            ) as ket
+        FROM tperawatan a 
+        LEFT JOIN tjenisperawatan b ON a.jenis_perawatan = b.id 
+        WHERE a.tanggal BETWEEN ? AND ?
+        AND a.nopol = ?
+    `;
+
+    const [rows] = await connection.execute(sql, [startDate, endDate, noplat]);
+
+    await connection.end();
+    return rows;
+}
+
+async function getAllKendaraan() {
+    const connection = await mysql.createConnection(dbConfig);
+    
+    const sql = "SELECT noplat, keterangan FROM tkendaraan";
+    
+    const [rows] = await connection.execute(sql);
+
+    await connection.end();
+    return rows;
+}
+
+async function searchKendaraan(searchQuery) {
+    const connection = await mysql.createConnection(dbConfig);
+
+    const sql = "SELECT noplat FROM tkendaraan WHERE noplat LIKE ? ORDER BY noplat LIMIT 20";
+    
+    const [rows] = await connection.execute(sql, [`%${searchQuery}%`]);
+
+    await connection.end();
+    return rows.map(row => row.noplat);
+}
+
+module.exports = {
+    getAllNoplat,
+    getHistoryPerawatan,
+    getAllKendaraan,
+    searchKendaraan
+};
