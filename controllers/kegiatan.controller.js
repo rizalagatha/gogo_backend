@@ -134,20 +134,19 @@ async function submitCheckout(req, res) {
 async function submitKegiatanDetail(req, res) {
     try {
         const detailData = {
-            // Menggunakan 'kegiatan_id' agar cocok dengan yang dikirim Flutter
-            header_id: req.body.kegiatan_id, 
-            customer: req.body.customer,
-            latitude: req.body.latitude,
-            longitude: req.body.longitude,
-            // Menyimpan nama file yang di-generate oleh multer
-            foto_path: req.file ? req.file.filename : null, 
-            status:req.body.status
+            id: req.body.id ? Number(req.body.id) : null, // <= tambahin ini
+            header_id: req.body.kegiatan_id ?? null,
+            customer: req.body.customer ?? null,
+            latitude: req.body.latitude ?? null,
+            longitude: req.body.longitude ?? null,
+            foto_path: req.file ? req.file.filename : (req.body.foto_path ?? null),
+            status: req.body.status ?? null
         };
 
-        console.log("DEBUG detailData:", detailData);       
+        console.log("DEBUG detailData:", detailData);
 
         const result = await kegiatanService.submitKegiatanDetail(detailData);
-        res.json({ success: true, message: 'Update info berhasil disimpan.' });
+        res.json({ success: true, message: 'Info detail berhasil disimpan.' });
     } catch (error) {
         console.error("Controller Error:", error);
         res.status(500).json({ success: false, message: 'Gagal menyimpan detail kegiatan' });
