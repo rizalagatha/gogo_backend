@@ -47,7 +47,7 @@ async function getKegiatanDetail(kegiatanId) {
 
         // Query 2: Ambil sub-detail dengan header_id (INT) yang cocok
         const subSql = `SELECT id, customer, jam, latitude, longitude, foto FROM tkegiatan_dtl WHERE header_id = ?`;
-        const [subRows] = await connection.execute(subSql, [pdNomor]);
+        const [subRows] = await connection.execute(subSql, [pdNomor || null]);
 
         return { main_data: mainData, sub_details: subRows };
     } finally {
