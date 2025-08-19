@@ -31,33 +31,30 @@ async function getCheckoutFormData(userKode, nomorMinta) {
 async function getKegiatanDetail(kegiatanId) {
     const connection = await mysql.createConnection(dbConfig);
     try {
-        // Query utama: gabung tkegiatan + tkaryawan + tpermintaandriver
         const mainSql = `
             SELECT 
-    a.id,
-    a.nomor_minta,
-    a.noplat,
-    a.tujuan,
-    IF(a.isplan = 0, 'Terjadwal', 'Tidak Terjadwal') AS status,
-    a.keterangan,
-    b.kar_nama AS namaDriver,
-    c.pd_nomor,
-    c.pd_tanggal,
-    c.pd_customer
-FROM tkegiatan a
-LEFT JOIN tkaryawan b ON a.kar_kode = b.kar_kode
-LEFT JOIN tpermintaandriver c ON a.nomor_minta = c.pd_nomor
-WHERE a.id = ?
+                a.id,
+                a.nomor_minta,
+                a.noplat,
+                a.tujuan,
+                IF(a.isplan = 0, 'Terjadwal', 'Tidak Terjadwal') AS status,
+                a.keterangan,
+                b.kar_nama AS namaDriver,
+                c.pd_nomor,
+                c.pd_tanggal,
+                c.pd_customer
+            FROM tkegiatan a
+            LEFT JOIN tkaryawan b ON a.kar_kode = b.kar_kode
+            LEFT JOIN tpermintaandriver c ON a.nomor_minta = c.pd_nomor
+            WHERE a.id = ?
         `;
         const [mainRows] = await connection.execute(mainSql, [kegiatanId]);
         if (mainRows.length === 0) return null;
 
         const mainData = mainRows[0];
 
-        // Tentukan id yang dipakai untuk ambil sub-detail
         const headerKey = mainData.pd_nomor || mainData.nomor_minta || mainData.id;
 
-        // Query detail
         const subSql = `
             SELECT id, customer, jam, latitude, longitude, foto
             FROM tkegiatan_dtl
@@ -65,12 +62,19 @@ WHERE a.id = ?
         `;
         const [subRows] = await connection.execute(subSql, [headerKey]);
 
-        return { main_data: mainData, sub_details: subRows };
+        // konversi Buffer foto jadi string filename
+        const subDetails = subRows.map(row => ({
+            ...row,
+            foto: row.foto ? row.foto.toString() : null  // ⬅️ ini fix-nya
+            // kalau mau full URL:
+            // foto: row.foto ? `${process.env.APP_URL}/${process.env.UPLOAD_DIR}/${row.foto.toString()}` : null
+        }));
+
+        return { main_data: mainData, sub_details: subDetails };
     } finally {
         await connection.end();
     }
 }
-
 
 async function getKegiatanInfo(kegiatanId) {
     const connection = await mysql.createConnection(dbConfig);
