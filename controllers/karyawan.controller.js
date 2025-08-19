@@ -29,7 +29,19 @@ async function getHistoryJob(req, res) {
     }
 }
 
+async function getOpenJobs(req, res) {
+    const karKode = req.params.kar_kode;
+    try {
+        const jobList = await karyawanService.getOpenJobsByKaryawan(karKode);
+        res.json({ success: true, data: jobList });
+    } catch (error) {
+        console.error("Controller Error:", error);
+        res.status(500).json({ success: false, message: 'Gagal mengambil data pekerjaan.' });
+    }
+}
+
 module.exports = {
     getAllKaryawan,
-    getHistoryJob // Ekspor fungsi baru
+    getHistoryJob,
+    getOpenJobs // Ekspor fungsi baru
 };

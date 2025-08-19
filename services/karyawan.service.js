@@ -36,7 +36,30 @@ async function getHistoryJob(karKode, startDate, endDate) {
     return rows;
 }
 
+async function getOpenJobsByKaryawan(karKode) {
+    const connection = await mysql.createConnection(dbConfig);
+    
+    // Query untuk mengambil kegiatan yang "sedang berjalan" atau siap diupdate
+    const sql = `
+        SELECT 
+            a.id,
+            a.tujuan
+        FROM tkegiatan a
+        WHERE a.kar_kode = ? 
+        AND a.pd_isClosed = 2 
+        ORDER BY a.tanggal DESC
+    `;
+
+    try {
+        const [rows] = await connection.execute(sql, [karKode]);
+        return rows;
+    } finally {
+        await connection.end();
+    }
+}
+
 module.exports = {
     getAllActive,
-    getHistoryJob // Ekspor fungsi baru
+    getHistoryJob,
+    getOpenJobsByKaryawan // Ekspor fungsi baru
 };

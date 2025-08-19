@@ -10,4 +10,7 @@ router.get('/', karyawanController.getAllKaryawan);
 // Rute untuk GET /api/karyawan/:kar_kode/history?start_date=...&end_date=...
 router.get('/:kar_kode/history', karyawanController.getHistoryJob);
 
+// Rute untuk GET /api/karyawan/:kar_kode/open-jobs
+router.get('/:kar_kode/open-jobs', karyawanController.getOpenJobs);
+
 module.exports = router;
