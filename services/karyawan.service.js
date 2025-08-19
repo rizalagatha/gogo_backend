@@ -42,14 +42,12 @@ async function getOpenJobsByKaryawan(karKode) {
     // Query untuk mengambil kegiatan yang "sedang berjalan" atau siap diupdate
     const sql = `
         SELECT 
-            a.pd_nomor,
-            a.tujuan,
-            DATE_FORMAT(a.tanggal, '%d-%m-%Y') as tanggal,
-            a.jamawal as jam
-        FROM tkegiatan a
-        WHERE a.kar_kode = ? 
-        AND a.pd_isclosed = 2 
-        ORDER BY a.tanggal DESC
+            pd_nomor as id,
+            pd_uraian as tujuan
+        FROM tpermintaandriver
+        WHERE pd_driver = ? 
+        AND pd_isClosed = 2
+        ORDER BY pd_tanggal DESC
     `;
 
     try {
