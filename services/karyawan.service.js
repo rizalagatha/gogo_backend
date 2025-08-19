@@ -43,10 +43,12 @@ async function getOpenJobsByKaryawan(karKode) {
     const sql = `
         SELECT 
             a.id,
-            a.tujuan
+            a.tujuan,
+            DATE_FORMAT(a.tanggal, '%d-%m-%Y') as tanggal,
+            a.jamawal as jam
         FROM tkegiatan a
         WHERE a.kar_kode = ? 
-        AND a.pd_isClosed = 2 
+        AND a.status = 2  
         ORDER BY a.tanggal DESC
     `;
 
