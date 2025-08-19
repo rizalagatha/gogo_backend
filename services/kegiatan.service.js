@@ -159,37 +159,50 @@ async function submitCheckout(checkoutData) {
 }
 
 async function submitKegiatanDetail(detailData) {
+    // [DEBUG] Mencetak seluruh data yang diterima dari controller
+    console.log("[DEBUG] Data yang diterima oleh service:", detailData);
+
     const connection = await mysql.createConnection(dbConfig);
 
     try {
         await connection.beginTransaction();
 
-        // 1. Dapatkan ID baru untuk tkegiatan_dtl
         const [idRows] = await connection.execute("SELECT IFNULL(MAX(id), 0) + 1 as new_id FROM tkegiatan_dtl");
         const newId = idRows[0].new_id;
 
-        // 2. Insert data baru
+        // [PERBAIKAN] Menggunakan CURTIME() untuk kolom jam dan menambahkan kolom status
         const sql = `
             INSERT INTO tkegiatan_dtl (id, header_id, customer, latitude, longitude, jam, foto) 
             VALUES (?, ?, ?, ?, ?, NOW(), ?)
         `;
 
-        await connection.execute(sql, [
+        // [PENGAMAN] Ubah string kosong menjadi null untuk kolom angka
+        const latitude = detailData.latitude === '' ? null : detailData.latitude;
+        const longitude = detailData.longitude === '' ? null : detailData.longitude;
+
+        const params = [
             newId,
             detailData.header_id,
             detailData.customer,
-            detailData.latitude,
-            detailData.longitude,
-            detailData.foto_path
-        ]);
+            latitude,
+            longitude,
+            detailData.foto_path,
+            detailData.status
+        ];
+        
+        // [DEBUG] Mencetak parameter yang akan di-insert ke database
+        console.log("[DEBUG] Parameter untuk query INSERT:", params);
+
+        await connection.execute(sql, params);
 
         await connection.commit();
+        
+        console.log(`[SUCCESS] Data berhasil disimpan dengan ID baru: ${newId}`);
         return { success: true };
 
     } catch (error) {
         await connection.rollback();
-        // Log error asli dari database untuk debugging
-        console.error("Service/Database Error:", error);
+        console.error("Service/Database Error:", error); 
         throw error;
     } finally {
         await connection.end();

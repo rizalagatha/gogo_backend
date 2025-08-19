@@ -141,6 +141,7 @@ async function submitKegiatanDetail(req, res) {
             longitude: req.body.longitude,
             // Menyimpan nama file yang di-generate oleh multer
             foto_path: req.file ? req.file.filename : null, 
+            status:req.body.status
         };
 
         console.log("DEBUG detailData:", detailData);       
