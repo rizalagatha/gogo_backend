@@ -52,14 +52,13 @@ async function getKegiatanDetail(kegiatanId) {
         if (mainRows.length === 0) return null;
 
         const mainData = mainRows[0];
-        const pdNomor = mainData.pd_nomor;
 
         const subSql = `
             SELECT id, customer, jam, latitude, longitude, foto
             FROM tkegiatan_dtl
             WHERE header_id = ?
         `;
-        const [subRows] = await connection.execute(subSql, [kegiatanId, pdNomor]);
+        const [subRows] = await connection.execute(subSql, [kegiatanId]);
 
         // konversi Buffer foto jadi string filename
         const subDetails = subRows.map(row => ({
