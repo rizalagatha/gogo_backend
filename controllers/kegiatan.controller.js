@@ -135,7 +135,7 @@ async function submitKegiatanDetail(req, res) {
     try {
         const detailData = {
             id: req.body.id ? Number(req.body.id) : null, // <= tambahin ini
-            header_id: req.body.kegiatan_id ?? null,
+            header_id: req.body.kegiatan_id || req.body.header_id || null,
             customer: req.body.customer ?? null,
             latitude: req.body.latitude ?? null,
             longitude: req.body.longitude ?? null,
