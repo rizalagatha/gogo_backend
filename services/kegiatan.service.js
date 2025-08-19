@@ -187,7 +187,6 @@ async function submitKegiatanDetail(detailData) {
             latitude,
             longitude,
             detailData.foto_path,
-            detailData.status
         ];
         
         // [DEBUG] Mencetak parameter yang akan di-insert ke database
