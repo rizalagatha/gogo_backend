@@ -22,7 +22,6 @@ async function getHistoryPerawatan(noplat, startDate, endDate) {
 
     const sql = `
         SELECT 
-            a.id, 
             IFNULL(b.jenis_perawatan, 'Lainnya') as tujuan,
             CONCAT(
                 'Tanggal : ', a.tanggal,
