@@ -17,6 +17,7 @@ const perawatanRouter = require('./routes/perawatan.routes');
 const permintaanRouter = require('./routes/permintaan.routes');
 const authRouter = require('./routes/auth.routes');
 const notificationsRouter = require('./routes/notifications.routes');
+const visitRouter = require('./routes/visit.routes');
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -49,6 +50,7 @@ app.use('/api/perawatan', perawatanRouter);
 app.use('/api/permintaan', permintaanRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/notifications', notificationsRouter);
+app.use('/api/visit', visitRouter);
 
 app.listen(port, () => {
     console.log(`Server berjalan di http://localhost:${port}`);

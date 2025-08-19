@@ -13,5 +13,6 @@ router.get('/:id/info', kegiatanController.getKegiatanInfo);
 router.post('/checkin', kegiatanController.submitCheckin);
 router.post('/checkout', upload.single('foto'), kegiatanController.submitCheckout);
 router.post('/detail', upload.single('foto'), kegiatanController.submitKegiatanDetail);
+router.get('/:id/details', kegiatanController.getAllDetailsForKegiatan);
 
 module.exports = router;

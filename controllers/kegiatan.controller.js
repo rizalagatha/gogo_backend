@@ -153,6 +153,22 @@ async function submitKegiatanDetail(req, res) {
     }
 }
 
+async function getAllDetailsForKegiatan(req, res) {
+    const kegiatanId = parseInt(req.params.id, 10);
+
+    if (isNaN(kegiatanId)) {
+        return res.status(400).json({ success: false, message: 'ID Kegiatan tidak valid.' });
+    }
+
+    try {
+        const details = await kegiatanService.getDetailsByKegiatanId(kegiatanId);
+        res.json({ success: true, data: details });
+    } catch (error) {
+        console.error("Controller Error:", error);
+        res.status(500).json({ success: false, message: 'Gagal mengambil detail kegiatan.' });
+    }
+}
+
 module.exports = {
     getOpenJobStatus,
     getCheckoutForm,
@@ -160,5 +176,6 @@ module.exports = {
     getKegiatanInfo,
     submitCheckin,
     submitCheckout,
-    submitKegiatanDetail
+    submitKegiatanDetail,
+    getAllDetailsForKegiatan
 };

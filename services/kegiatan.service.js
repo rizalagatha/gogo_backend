@@ -182,6 +182,32 @@ async function submitKegiatanDetail(detailData) {
     }
 }
 
+async function getDetailsByKegiatanId(kegiatanId) {
+    const connection = await mysql.createConnection(dbConfig);
+    
+    // Asumsi: tabel 'tkegiatan_dtl' memiliki kolom 'kegiatan_id' sebagai foreign key
+    // yang merujuk ke 'tkegiatan.id'. Sesuaikan nama kolom jika berbeda.
+    const sql = `
+        SELECT 
+            id,
+            customer,
+            foto,
+            latitude,
+            longitude
+        FROM 
+            tkegiatan_dtl 
+        WHERE 
+            kegiatan_id = ?
+    `;
+
+    try {
+        const [rows] = await connection.execute(sql, [kegiatanId]);
+        return rows;
+    } finally {
+        await connection.end();
+    }
+}
+
 module.exports = {
     checkOpenJob,
     getCheckoutFormData,
@@ -189,5 +215,6 @@ module.exports = {
     getKegiatanInfo,
     submitCheckin,
     submitCheckout,
-    submitKegiatanDetail
+    submitKegiatanDetail,
+    getDetailsByKegiatanId
 };
