@@ -38,7 +38,7 @@ app.use(express.json());
 // Middleware untuk parsing form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/karyawan', karyawanRouter);
 app.use('/api/app-version', versionRouter);
