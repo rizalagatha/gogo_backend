@@ -159,49 +159,48 @@ async function submitCheckout(checkoutData) {
 }
 
 async function submitKegiatanDetail(detailData) {
-    // [DEBUG] Mencetak seluruh data yang diterima dari controller
     console.log("[DEBUG] Data yang diterima oleh service:", detailData);
-
     const connection = await mysql.createConnection(dbConfig);
 
     try {
         await connection.beginTransaction();
 
-        const [idRows] = await connection.execute("SELECT IFNULL(MAX(id), 0) + 1 as new_id FROM tkegiatan_dtl");
-        const newId = idRows[0].new_id;
-
-        // [PERBAIKAN] Menggunakan CURTIME() untuk kolom jam dan menambahkan kolom status
-        const sql = `
-            INSERT INTO tkegiatan_dtl (id, header_id, customer, latitude, longitude, jam, foto) 
-            VALUES (?, ?, ?, ?, ?, NOW(), ?)
-        `;
-
-        // [PENGAMAN] Ubah string kosong menjadi null untuk kolom angka
         const latitude = detailData.latitude === '' ? null : detailData.latitude;
         const longitude = detailData.longitude === '' ? null : detailData.longitude;
 
-        const params = [
-            newId,
-            detailData.header_id,
-            detailData.customer,
-            latitude,
-            longitude,
-            detailData.foto_path,
-        ];
-        
-        // [DEBUG] Mencetak parameter yang akan di-insert ke database
-        console.log("[DEBUG] Parameter untuk query INSERT:", params);
+        if (detailData.id) {
+            // === UPDATE jika ada id
+            const sql = `
+                UPDATE tkegiatan_dtl 
+                SET customer = ?, latitude = ?, longitude = ?, foto = ?, jam = NOW()
+                WHERE id = ?
+            `;
+            const params = [detailData.customer, latitude, longitude, detailData.foto_path, detailData.id];
+            console.log("[DEBUG] Parameter untuk query UPDATE:", params);
+            await connection.execute(sql, params);
 
-        await connection.execute(sql, params);
+            console.log(`[SUCCESS] Data dengan ID ${detailData.id} berhasil diupdate`);
+        } else {
+            // === INSERT baru
+            const [idRows] = await connection.execute("SELECT IFNULL(MAX(id), 0) + 1 as new_id FROM tkegiatan_dtl");
+            const newId = idRows[0].new_id;
+
+            const sql = `
+                INSERT INTO tkegiatan_dtl (id, header_id, customer, latitude, longitude, jam, foto) 
+                VALUES (?, ?, ?, ?, ?, NOW(), ?)
+            `;
+            const params = [newId, detailData.header_id, detailData.customer, latitude, longitude, detailData.foto_path];
+            console.log("[DEBUG] Parameter untuk query INSERT:", params);
+            await connection.execute(sql, params);
+
+            console.log(`[SUCCESS] Data baru berhasil disimpan dengan ID ${newId}`);
+        }
 
         await connection.commit();
-        
-        console.log(`[SUCCESS] Data berhasil disimpan dengan ID baru: ${newId}`);
         return { success: true };
-
     } catch (error) {
         await connection.rollback();
-        console.error("Service/Database Error:", error); 
+        console.error("Service/Database Error:", error);
         throw error;
     } finally {
         await connection.end();
