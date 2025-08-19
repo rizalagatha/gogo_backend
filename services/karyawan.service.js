@@ -48,7 +48,7 @@ async function getOpenJobsByKaryawan(karKode) {
             a.jamawal as jam
         FROM tkegiatan a
         WHERE a.kar_kode = ? 
-        AND a.pd_isClosed = 2  -- <-- Diperbaiki dan diaktifkan
+        AND a.pd_isclosed = 2 
         ORDER BY a.tanggal DESC
     `;
 
