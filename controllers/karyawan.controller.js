@@ -12,7 +12,6 @@ async function getAllKaryawan(req, res) {
     }
 }
 
-// [PERUBAHAN] Fungsi baru ditambahkan di sini
 async function getHistoryJob(req, res) {
     const karKode = req.params.kar_kode;
     const { start_date, end_date } = req.query;

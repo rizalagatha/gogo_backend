@@ -1,5 +1,6 @@
 // controllers/auth.controller.js
 
+const { get } = require('../routes/version.routes');
 const authService = require('../services/auth.service');
 
 async function login(req, res) {
@@ -28,6 +29,27 @@ async function login(req, res) {
     }
 }
 
+async function getCredentials(req, res) {
+    const { kode } = req.query;
+
+    if (!kode) {
+        return res.status(400).json({ success: false, message: 'Kode tidak boleh kosong.' });
+    }
+
+    try {
+        const result = await authService.getPasswordByKode(kode);
+        if (result) {
+            res.json({ success: true, password: result.kar_password });
+        } else {
+            res.status(404).json({ success: false, message: 'User tidak ditemukan' });
+        }
+    } catch (error) {
+        console.error("Controller Error:", error);
+        res.status(500).json({ success: false, message: 'Gagal mengambil kredensial' });
+    }
+}
+
 module.exports = {
-    login
+    login,
+    getCredentials
 };

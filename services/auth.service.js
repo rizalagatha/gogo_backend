@@ -16,7 +16,15 @@ async function login(username, password) {
     // Kembalikan data pengguna jika ditemukan, jika tidak kembalikan null
     return rows.length > 0 ? rows[0] : null;
 }
+async function getPasswordByKode(kode) {
+    const connection = await mysql.createConnection(dbConfig);
+    const sql = "SELECT kar_password FROM tkaryawan WHERE kar_kode = ?";
+    const [rows] = await connection.execute(sql, [kode]);
+    await connection.end();
+    return rows.length > 0 ? rows[0] : null;
+}
 
 module.exports = {
-    login
+    login,
+    getPasswordByKode
 };
