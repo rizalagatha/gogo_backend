@@ -32,25 +32,33 @@ async function getKegiatanDetail(kegiatanId) {
     const connection = await mysql.createConnection(dbConfig);
 
     // Query 1: Get main activity data
-    const sql_main = `
-        SELECT 
-            noplat, 
-            tujuan, 
-            IF(isplan=0, 'Terjadwal', 'Tidak Terjadwal') as isplan, 
-            keterangan, 
-            kar_nama 
-        FROM tkegiatan a 
-        INNER JOIN tkaryawan b ON a.kar_kode = b.kar_kode 
-        WHERE a.id = ?
-    `;
+    const mainSql = `
+            SELECT 
+                a.noplat, 
+                a.tujuan, 
+                IF(a.isplan=0, 'Terjadwal', 'Tidak Terjadwal') as status, 
+                a.keterangan, 
+                b.kar_nama as namaDriver,
+                a.note,
+                a.pd_nomor -- <-- Kolom ini tetap penting untuk join
+            FROM tkegiatan a 
+            INNER JOIN tkaryawan b ON a.kar_kode = b.kar_kode 
+            WHERE a.id = ?
+        `;
     const [main_rows] = await connection.execute(sql_main, [kegiatanId]);
+    const pdNomor = mainData.pd_nomor;
 
     // Query 2: Get sub-details
     const sql_details = `
-        SELECT id, header_id, customer, latitude, longitude, jam 
-        FROM tkegiatan_dtl 
-        WHERE header_id = ?
-    `;
+        SELECT 
+                id, 
+                customer, 
+                jam,
+                latitude,
+                longitude
+            FROM tkegiatan_dtl 
+            WHERE header_id = ?
+        `;
     const [sub_details_rows] = await connection.execute(sql_details, [kegiatanId]);
 
     await connection.end();
@@ -174,7 +182,7 @@ async function submitKegiatanDetail(detailData) {
     } catch (error) {
         await connection.rollback();
         // Log error asli dari database untuk debugging
-        console.error("Service/Database Error:", error); 
+        console.error("Service/Database Error:", error);
         throw error;
     } finally {
         await connection.end();
@@ -183,7 +191,7 @@ async function submitKegiatanDetail(detailData) {
 
 async function getDetailsByKegiatanId(kegiatanId) {
     const connection = await mysql.createConnection(dbConfig);
-    
+
     // Asumsi: tabel 'tkegiatan_dtl' memiliki kolom 'kegiatan_id' sebagai foreign key
     // yang merujuk ke 'tkegiatan.id'. Sesuaikan nama kolom jika berbeda.
     const sql = `
