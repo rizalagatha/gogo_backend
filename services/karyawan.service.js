@@ -51,7 +51,7 @@ async function getOpenJobsByKaryawan(karKode) {
             a.pd_jamkerja as jamKerja                           -- <-- Ambil jam
         FROM tpermintaandriver a
         JOIN tkaryawan b ON a.pd_driver = b.kar_nama
-        JOIN tkegiatan c ON a.pd_nomor = c.pd_nomor
+        JOIN tkegiatan c ON a.pd_nomor = c.nomor_minta
         WHERE b.kar_kode = ? 
         AND a.pd_isClosed = 2
         ORDER BY a.pd_tglKerja DESC
