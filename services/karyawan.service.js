@@ -13,13 +13,13 @@ async function getAllActive() {
     return rows;
 }
 
-// [PERUBAHAN] Fungsi baru ditambahkan di sini
 async function getHistoryJob(karKode, startDate, endDate) {
     const connection = await mysql.createConnection(dbConfig);
 
     const sql = `
         SELECT 
             a.id,
+            DATE_FORMAT(a.tanggal, '%d-%m-%Y') as tanggal,
             REPLACE(a.tujuan, '\\n', '') as tujuan,
             CONCAT(a.jamawal, ' s/d ', IFNULL(a.jamakhir, '')) as jam,
             CONCAT(b.keterangan, ' ', a.noplat) as keterangan
