@@ -149,14 +149,11 @@ async function submitKegiatanDetail(detailData) {
     try {
         await connection.beginTransaction();
 
-        // 1. Get new ID
+        // 1. Dapatkan ID baru untuk tkegiatan_dtl
         const [idRows] = await connection.execute("SELECT IFNULL(MAX(id), 0) + 1 as new_id FROM tkegiatan_dtl");
         const newId = idRows[0].new_id;
 
-        // Debug: cek panjang path foto
-        console.log("DEBUG: foto_path =", detailData.foto_path, "length =", detailData.foto_path ? detailData.foto_path.length : 0);
-
-        // 2. Insert data → foto bukan buffer lagi, cukup string path
+        // 2. Insert data baru
         const sql = `
             INSERT INTO tkegiatan_dtl (id, header_id, customer, latitude, longitude, jam, foto) 
             VALUES (?, ?, ?, ?, ?, NOW(), ?)
@@ -176,6 +173,8 @@ async function submitKegiatanDetail(detailData) {
 
     } catch (error) {
         await connection.rollback();
+        // Log error asli dari database untuk debugging
+        console.error("Service/Database Error:", error); 
         throw error;
     } finally {
         await connection.end();

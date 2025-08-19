@@ -45,8 +45,8 @@ async function getOpenJobsByKaryawan(karKode) {
             a.pd_nomor as id,
             CONCAT(a.pd_customer, ' => ', a.pd_uraian) as tujuan
         FROM tpermintaandriver a
-        JOIN tkaryawan b ON a.pd_driver = b.kar_nama -- <-- JOIN berdasarkan nama driver
-        WHERE b.kar_kode = ?  -- <-- Filter berdasarkan KODE dari tabel karyawan
+        JOIN tkaryawan b ON a.pd_driver = b.kar_nama 
+        WHERE b.kar_kode = ?  
         AND a.pd_isClosed = 2
         ORDER BY a.pd_tglKerja DESC
     `;
