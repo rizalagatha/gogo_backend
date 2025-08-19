@@ -34,7 +34,7 @@ async function getKegiatanDetail(kegiatanId) {
         // Query 1: Ambil data utama (tidak perlu diubah)
         const mainSql = `
             SELECT a.noplat, a.tujuan, IF(a.isplan=0, 'Terjadwal', 'Tidak Terjadwal') as status, 
-                   a.keterangan, b.kar_nama as namaDriver, a.pd_nomor
+                   a.keterangan, b.kar_nama as namaDriver
             FROM tkegiatan a 
             INNER JOIN tkaryawan b ON a.kar_kode = b.kar_kode 
             WHERE a.id = ?
