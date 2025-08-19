@@ -48,14 +48,18 @@ async function getOpenJobsByKaryawan(karKode) {
             a.jamawal as jam
         FROM tkegiatan a
         WHERE a.kar_kode = ? 
-        AND a.status = 2  
+        AND a.pd_isClosed = 2  -- <-- Diperbaiki dan diaktifkan
         ORDER BY a.tanggal DESC
     `;
 
     try {
         const [rows] = await connection.execute(sql, [karKode]);
         return rows;
-    } finally {
+    } catch (error) {
+        console.error('[FATAL] Terjadi error saat menjalankan query getOpenJobs:', error);
+        throw error;
+    } 
+    finally {
         await connection.end();
     }
 }
