@@ -6,6 +6,6 @@ const notificationsController = require('../controllers/notifications.controller
 
 // Rute untuk GET /api/notifications?user_kode=...
 router.get('/', notificationsController.getNotifications);
-router.get('/active-jobs/:kar_kode', notificationController.checkActiveJobs);
+router.get('/active-jobs/:kar_kode', notificationsController.checkActiveJobs);
 
 module.exports = router;
