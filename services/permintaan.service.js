@@ -28,16 +28,24 @@ async function getSelectableJobs(searchQuery) {
     const connection = await mysql.createConnection(dbConfig);
 
     const sql = `
-        SELECT 
-            pd_nomor,
-            pd_tipejadwal,
-            pd_customer,
-            pd_uraian
-        FROM tpermintaandriver 
-        WHERE pd_isclosed = 0 
-        AND pd_tglkerja <= CURDATE()
-        AND (pd_nomor LIKE ? OR pd_customer LIKE ? OR pd_uraian LIKE ?)
-        ORDER BY pd_tglkerja
+        SELECT
+    pd_nomor,
+    pd_userpeminta AS peminta,
+    pd_pengambilan AS pengambilan,
+    pd_pic AS pic,
+    pd_customer AS customer,
+    pd_uraian AS uraian,
+    pd_tipejadwal AS tipeJadwal,
+    DATE_FORMAT(pd_tglkerja, '%d-%m-%Y') AS tglKerja,
+    pd_jamkerja AS jamKerja,
+    IF(pd_isclosed = 0, 'Belum', 'Selesai') AS status,
+    pd_driver AS driver
+FROM tpermintaandriver
+WHERE
+    pd_isclosed = 0
+    AND pd_tglkerja <= CURDATE()
+    AND (pd_nomor LIKE ? OR pd_customer LIKE ? OR pd_uraian LIKE ?)
+ORDER BY pd_tglkerja DESC;
     `;
 
     const queryParam = `%${searchQuery}%`;
