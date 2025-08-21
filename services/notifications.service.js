@@ -2,6 +2,7 @@
 
 const mysql = require('mysql2/promise');
 const dbConfig = require('../config/db.config');
+const { get } = require('../routes/version.routes');
 
 async function getNewNotifications(userKode) {
     const connection = await mysql.createConnection(dbConfig);
@@ -42,6 +43,32 @@ async function getNewNotifications(userKode) {
     }
 }
 
+async function getActiveJobsForNotification(karKode) {
+    const connection = await mysql.createConnection(dbConfig);
+    
+    // Query ini menghitung jumlah pekerjaan yang belum ditutup, tidak dibatalkan,
+    // dan jadwalnya adalah hari ini atau sebelumnya, untuk driver yang spesifik.
+    const sql = `
+        SELECT 
+            COUNT(*) as job_count
+        FROM tpermintaandriver a
+        JOIN tkaryawan b ON a.pd_driver = b.kar_nama
+        WHERE 
+            b.kar_kode = ?
+            AND a.pd_isclosed = 0 
+            AND a.pd_iscancel = 0
+            AND a.pd_tglkerja <= CURDATE()
+    `;
+
+    try {
+        const [rows] = await connection.execute(sql, [karKode]);
+        return rows[0]; // Mengembalikan baris pertama (hasil COUNT)
+    } finally {
+        await connection.end();
+    }
+}
+
 module.exports = {
-    getNewNotifications
+    getNewNotifications,
+    getActiveJobsForNotification
 };

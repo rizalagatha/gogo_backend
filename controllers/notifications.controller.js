@@ -1,5 +1,6 @@
 // controllers/notifications.controller.js
 
+const { get } = require('../routes/version.routes');
 const notificationsService = require('../services/notifications.service');
 
 async function getNotifications(req, res) {
@@ -29,6 +30,29 @@ async function getNotifications(req, res) {
     }
 }
 
+async function checkActiveJobs(req, res) {
+    const karKode = req.params.kar_kode;
+    try {
+        const result = await notificationService.getActiveJobsForNotification(karKode);
+        const jobCount = result.job_count || 0;
+
+        if (jobCount > 0) {
+            res.json({ 
+                success: true, 
+                show_notification: true,
+                title: 'Pekerjaan Aktif',
+                body: `Anda memiliki ${jobCount} pekerjaan yang perlu di-check in.`
+            });
+        } else {
+            res.json({ success: true, show_notification: false });
+        }
+    } catch (error) {
+        console.error("Notification Controller Error:", error);
+        res.status(500).json({ success: false, message: 'Gagal memeriksa notifikasi.' });
+    }
+}
+
 module.exports = {
-    getNotifications
+    getNotifications,
+    checkActiveJobs
 };
