@@ -33,7 +33,7 @@ async function getNotifications(req, res) {
 async function checkActiveJobs(req, res) {
     const karKode = req.params.kar_kode;
     try {
-        const result = await notificationService.getActiveJobsForNotification(karKode);
+        const result = await notificationsService.getActiveJobsForNotification(karKode);
         const jobCount = result.job_count || 0;
 
         if (jobCount > 0) {
