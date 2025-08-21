@@ -6,7 +6,7 @@ const dbConfig = require('../config/db.config');
 // Fungsi untuk mengambil data yang dibutuhkan form input permintaan
 async function getFormData() {
     const connection = await mysql.createConnection(dbConfig);
-    
+
     // 1. Get Server Time
     const [timeRows] = await connection.execute("SELECT NOW() as server_time");
     const serverTime = timeRows[0].server_time;
@@ -15,7 +15,7 @@ async function getFormData() {
     const prefix = 'MND.' + new Date(serverTime).toISOString().slice(0, 7).replace('-', '') + '.';
     const sql_kode = "SELECT IFNULL(MAX(CAST(RIGHT(pd_nomor, 4) AS UNSIGNED)), 0) as max_kode FROM tpermintaandriver WHERE pd_nomor LIKE ?";
     const [kodeRows] = await connection.execute(sql_kode, [prefix + '%']);
-    
+
     await connection.end();
 
     return {
@@ -44,7 +44,11 @@ FROM tpermintaandriver
 WHERE
     pd_isclosed = 0
     AND pd_tglkerja <= CURDATE()
-    AND (pd_nomor LIKE ? OR pd_customer LIKE ? OR pd_uraian LIKE ?)
+    AND (
+        pd_nomor LIKE ? OR
+        pd_customer LIKE ? OR
+        pd_uraian LIKE ?
+    )
 ORDER BY pd_tglkerja DESC;
     `;
 
