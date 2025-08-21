@@ -34,7 +34,7 @@ async function getSelectableJobs(searchQuery) {
             pd_customer,
             pd_uraian
         FROM tpermintaandriver 
-        WHERE pd_ = 0 
+        WHERE pd_isclosed = 0 
         AND pd_tglkerja <= CURDATE()
         AND (pd_nomor LIKE ? OR pd_customer LIKE ? OR pd_uraian LIKE ?)
         ORDER BY pd_tglkerja
