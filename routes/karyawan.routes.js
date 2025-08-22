@@ -13,4 +13,7 @@ router.get('/:kar_kode/history', karyawanController.getHistoryJob);
 // Rute untuk GET /api/karyawan/:kar_kode/open-jobs
 router.get('/:kar_kode/open-jobs', karyawanController.getOpenJobs);
 
+// Rute untuk GET /api/karyawan/drivers
+router.get('/drivers', karyawanController.getDrivers);
+
 module.exports = router;

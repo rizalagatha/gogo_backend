@@ -1,5 +1,6 @@
 // controllers/karyawan.controller.js
 
+const { get } = require('../routes/version.routes');
 const karyawanService = require('../services/karyawan.service');
 
 async function getAllKaryawan(req, res) {
@@ -40,8 +41,20 @@ async function getOpenJobs(req, res) {
     }
 }
 
+async function getDrivers(req, res) {
+    const searchTerm = req.query.query || '';
+    try {
+        const driverList = await karyawanService.getDrivers(searchTerm);
+        res.json({ success: true, data: driverList });
+    } catch (error) {
+        console.error("Controller Error:", error);
+        res.status(500).json({ success: false, message: 'Gagal mengambil data driver' });
+    }
+}
+
 module.exports = {
     getAllKaryawan,
     getHistoryJob,
-    getOpenJobs // Ekspor fungsi baru
+    getOpenJobs,
+    getDrivers
 };

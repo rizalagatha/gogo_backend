@@ -69,8 +69,30 @@ async function getOpenJobsByKaryawan(karKode) {
     }
 }
 
+async function getDrivers(searchTerm) {
+    const connection = await mysql.createConnection(dbConfig);
+    const query = `%${searchTerm}%`;
+    
+    // Query untuk mencari driver berdasarkan kode atau nama
+    const sql = `
+        SELECT kar_kode, kar_nama 
+        FROM tkaryawan 
+        WHERE kar_aktif = 0 
+        AND (kar_kode LIKE ? OR kar_nama LIKE ?)
+        ORDER BY kar_nama ASC
+    `;
+
+    try {
+        const [rows] = await connection.execute(sql, [query, query]);
+        return rows;
+    } finally {
+        await connection.end();
+    }
+}
+
 module.exports = {
     getAllActive,
     getHistoryJob,
-    getOpenJobsByKaryawan // Ekspor fungsi baru
+    getOpenJobsByKaryawan,
+    getDrivers
 };
