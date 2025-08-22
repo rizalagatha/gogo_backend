@@ -19,22 +19,20 @@ async function getAllNoplat() {
 
 async function getHistoryPerawatan(nopol, startDate, endDate) {
     const connection = await mysql.createConnection(dbConfig);
+    // [PERBAIKAN] Mengirim data secara terpisah
     const sql = `
-        SELECT 
+        SELECT
             IFNULL(b.jenis_perawatan, 'Lainnya') as tujuan,
-            CONCAT(
-                'Tanggal : ', DATE_FORMAT(a.tanggal, '%d-%m-%Y'),
-                ' Bengkel : ', a.bengkel,
-                '\\r\\n',
-                'Biaya : ', FORMAT(a.biaya, 0),
-                ' KM : ', CAST(a.KM AS CHAR) 
-            ) as ket
-        FROM tperawatan a 
-        LEFT JOIN tjenisperawatan b ON a.jenis_perawatan = b.id 
+            DATE_FORMAT(a.tanggal, '%d-%m-%Y') as tanggal,
+            a.bengkel,
+            a.biaya,
+            a.KM
+        FROM tperawatan a
+        LEFT JOIN tjenisperawatan b ON a.jenis_perawatan = b.id
         WHERE a.tanggal BETWEEN ? AND ?
         AND a.nopol = ?
+        ORDER BY a.tanggal DESC
     `;
-
     try {
         const [rows] = await connection.execute(sql, [startDate, endDate, nopol]);
         return rows;
