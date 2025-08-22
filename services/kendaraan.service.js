@@ -27,7 +27,7 @@ async function getHistoryPerawatan(nopol, startDate, endDate) {
                 ' Bengkel : ', a.bengkel,
                 '\\r\\n',
                 'Biaya : ', FORMAT(a.biaya, 0),
-                ' KM : ', a.KM
+                ' KM : ', CAST(a.KM AS CHAR) 
             ) as ket
         FROM tperawatan a 
         LEFT JOIN tjenisperawatan b ON a.jenis_perawatan = b.id 
