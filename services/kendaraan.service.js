@@ -17,14 +17,13 @@ async function getAllNoplat() {
     return rows.map(row => row.noplat);
 }
 
-async function getHistoryPerawatan(noplat, startDate, endDate) {
+async function getHistoryPerawatan(nopol, startDate, endDate) {
     const connection = await mysql.createConnection(dbConfig);
-
     const sql = `
         SELECT 
             IFNULL(b.jenis_perawatan, 'Lainnya') as tujuan,
             CONCAT(
-                'Tanggal : ', a.tanggal,
+                'Tanggal : ', DATE_FORMAT(a.tanggal, '%d-%m-%Y'),
                 ' Bengkel : ', a.bengkel,
                 '\\r\\n',
                 'Biaya : ', FORMAT(a.biaya, 0),
@@ -36,10 +35,12 @@ async function getHistoryPerawatan(noplat, startDate, endDate) {
         AND a.nopol = ?
     `;
 
-    const [rows] = await connection.execute(sql, [startDate, endDate, noplat]);
-
-    await connection.end();
-    return rows;
+    try {
+        const [rows] = await connection.execute(sql, [startDate, endDate, nopol]);
+        return rows;
+    } finally {
+        await connection.end();
+    }
 }
 
 async function getAllKendaraan() {
