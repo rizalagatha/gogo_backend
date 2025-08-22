@@ -1,6 +1,5 @@
 // controllers/notifications.controller.js
 
-const { get } = require('../routes/version.routes');
 const notificationsService = require('../services/notifications.service');
 
 async function getNotifications(req, res) {
