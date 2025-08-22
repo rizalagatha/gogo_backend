@@ -120,30 +120,31 @@ async function submitCheckout(checkoutData) {
     try {
         await connection.beginTransaction();
 
-        // 1. Update tkegiatan
         let sql1 = `
-      UPDATE tkegiatan 
-      SET tanggal2 = NOW(), jamakhir = NOW(), keterangan = ?, standby = ?
-    `;
-
+            UPDATE tkegiatan 
+            SET tanggal2 = NOW(), jamakhir = NOW(), keterangan = ?, standby = ?
+        `;
         const params1 = [
             checkoutData.keterangan,
             checkoutData.standby,
         ];
-
         if (checkoutData.fotoPath) {
             sql1 += ", foto = ?";
-            params1.push(checkoutData.fotoPath); // simpan nama file, bukan buffer
+            params1.push(checkoutData.fotoPath);
         }
-
         sql1 += " WHERE kar_kode = ? AND nomor_minta = ? AND jamakhir IS NULL";
         params1.push(checkoutData.kar_kode, checkoutData.nomor_minta);
-
         await connection.execute(sql1, params1);
 
-        // 2. Update tpermintaandriver
-        const sql2 = "UPDATE tpermintaandriver SET pd_isclosed = 1 WHERE pd_nomor = ?";
-        await connection.execute(sql2, [checkoutData.nomor_minta]);
+        const sql2 = `
+            UPDATE tpermintaandriver 
+            SET pd_isclosed = 1, pd_penerima = ? 
+            WHERE pd_nomor = ?
+        `;
+        await connection.execute(sql2, [
+            checkoutData.penerima, 
+            checkoutData.nomor_minta
+        ]);
 
         await connection.commit();
         return { success: true };
