@@ -24,7 +24,7 @@ async function getMonitoringData() {
         ) last_kegiatan ON k.kar_kode = last_kegiatan.kar_kode
         LEFT JOIN tkegiatan t ON t.id = last_kegiatan.max_id
         WHERE 
-            k.kar_aktif = 0
+            k.kar_aktif = 0 AND k.kar_isdriver = 1
     `;
     
     const [rows] = await connection.execute(sql);
