@@ -55,7 +55,7 @@ async function getAllKendaraan() {
 async function searchKendaraan(searchQuery) {
     const connection = await mysql.createConnection(dbConfig);
 
-    const sql = "SELECT noplat FROM tkendaraan WHERE noplat LIKE ? ORDER BY noplat LIMIT 20";
+    const sql = "SELECT noplat FROM tkendaraan WHERE noplat LIKE ? ORDER BY noplat";
     
     const [rows] = await connection.execute(sql, [`%${searchQuery}%`]);
 
