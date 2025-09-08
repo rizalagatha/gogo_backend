@@ -24,7 +24,7 @@ async function getFormData() {
     };
 }
 
-async function getSelectableJobs(searchQuery) {
+async function getSelectableJobs(searchTerm) {
     const connection = await mysql.createConnection(dbConfig);
     const query = `%${searchTerm}%`;
 
