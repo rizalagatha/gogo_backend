@@ -26,6 +26,7 @@ async function getFormData() {
 
 async function getSelectableJobs(searchQuery) {
     const connection = await mysql.createConnection(dbConfig);
+    const query = `%${searchTerm}%`;
 
     const sql = `
         SELECT
@@ -46,17 +47,29 @@ WHERE
     AND pd_tglkerja <= CURDATE()
     AND (
         pd_nomor LIKE ? OR
+        pd_userpeminta LIKE ? OR
+        pd_pengambilan LIKE ? OR
         pd_customer LIKE ? OR
-        pd_uraian LIKE ?
+        pd_pic LIKE ? OR
+        pd_uraian LIKE ? OR
+        pd_tipejadwal LIKE ?
     )
 ORDER BY pd_tglkerja DESC;
     `;
 
-    const queryParam = `%${searchQuery}%`;
-    const [rows] = await connection.execute(sql, [queryParam, queryParam, queryParam]);
-
-    await connection.end();
-    return rows;
+    try {
+        // Kirim parameter query untuk setiap placeholder '?'
+        const [rows] = await connection.execute(sql, [
+            query, query, query, query, query, query, query
+        ]);
+        return rows;
+    } catch (error) {
+        console.error("Service Error:", error);
+        throw error;
+    }
+    finally {
+        await connection.end();
+    }
 }
 
 async function submitPermintaan(permintaanData) {
