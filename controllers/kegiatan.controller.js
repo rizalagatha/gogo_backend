@@ -143,7 +143,6 @@ async function submitKegiatanDetail(req, res) {
             status: req.body.status ?? null
         };
 
-        console.log("DEBUG detailData:", detailData);
 
         const result = await kegiatanService.submitKegiatanDetail(detailData);
         res.json({ success: true, message: 'Info detail berhasil disimpan.' });

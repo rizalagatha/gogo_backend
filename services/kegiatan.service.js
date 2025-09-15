@@ -158,7 +158,6 @@ async function submitCheckout(checkoutData) {
 }
 
 async function submitKegiatanDetail(detailData) {
-    console.log("[DEBUG] Data yang diterima oleh service:", detailData);
     const connection = await mysql.createConnection(dbConfig);
 
     try {
@@ -175,10 +174,8 @@ async function submitKegiatanDetail(detailData) {
                 WHERE id = ?
             `;
             const params = [detailData.customer, latitude, longitude, detailData.foto_path, detailData.id];
-            console.log("[DEBUG] Parameter untuk query UPDATE:", params);
             await connection.execute(sql, params);
 
-            console.log(`[SUCCESS] Data dengan ID ${detailData.id} berhasil diupdate`);
         } else {
             // === INSERT baru
             const [idRows] = await connection.execute("SELECT IFNULL(MAX(id), 0) + 1 as new_id FROM tkegiatan_dtl");
@@ -189,10 +186,8 @@ async function submitKegiatanDetail(detailData) {
                 VALUES (?, ?, ?, ?, ?, NOW(), ?)
             `;
             const params = [newId, detailData.header_id, detailData.customer, latitude, longitude, detailData.foto_path];
-            console.log("[DEBUG] Parameter untuk query INSERT:", params);
             await connection.execute(sql, params);
 
-            console.log(`[SUCCESS] Data baru berhasil disimpan dengan ID ${newId}`);
         }
 
         await connection.commit();
