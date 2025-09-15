@@ -77,8 +77,10 @@ async function getDrivers(searchTerm) {
     const sql = `
         SELECT kar_kode, kar_nama 
         FROM tkaryawan 
-        WHERE kar_aktif = 0 
-        AND (kar_kode LIKE ? OR kar_nama LIKE ?)
+        WHERE 
+            kar_aktif = 0 
+            AND kar_isdriver = 1 
+            AND (kar_kode LIKE ? OR kar_nama LIKE ?)
         ORDER BY kar_nama ASC
     `;
 
