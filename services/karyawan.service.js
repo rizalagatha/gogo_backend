@@ -1,22 +1,15 @@
 // services/karyawan.service.js
-
-const mysql = require('mysql2/promise');
-const dbConfig = require('../config/db.config');
+const pool = require("../config/db.config");
 
 async function getAllActive() {
-    const connection = await mysql.createConnection(dbConfig);
-    
-    const sql = "SELECT kar_kode, kar_nama FROM tkaryawan WHERE kar_aktif = 0 ORDER BY kar_nama ASC";
-    const [rows] = await connection.execute(sql);
-
-    await connection.end();
-    return rows;
+  const sql =
+    "SELECT kar_kode, kar_nama FROM tkaryawan WHERE kar_aktif = 0 ORDER BY kar_nama ASC";
+  const [rows] = await pool.execute(sql);
+  return rows;
 }
 
 async function getHistoryJob(karKode, startDate, endDate) {
-    const connection = await mysql.createConnection(dbConfig);
-
-    const sql = `
+  const sql = `
         SELECT 
             a.id,
             DATE_FORMAT(a.tanggal, '%d-%m-%Y') as tanggal,
@@ -30,17 +23,12 @@ async function getHistoryJob(karKode, startDate, endDate) {
         ORDER BY a.tanggal DESC
     `;
 
-    const [rows] = await connection.execute(sql, [startDate, endDate, karKode]);
-
-    await connection.end();
-    return rows;
+  const [rows] = await pool.execute(sql, [startDate, endDate, karKode]);
+  return rows;
 }
 
 async function getOpenJobsByKaryawan(karKode) {
-    const connection = await mysql.createConnection(dbConfig);
-    
-    // Query untuk mengambil kegiatan yang "sedang berjalan" atau siap diupdate
-    const sql = `
+  const sql = `
        SELECT 
             c.id,
             CONCAT(a.pd_customer, ' => ', a.pd_uraian) as tujuan,
@@ -57,24 +45,13 @@ async function getOpenJobsByKaryawan(karKode) {
         ORDER BY a.pd_tglKerja DESC
     `;
 
-    try {
-        const [rows] = await connection.execute(sql, [karKode]);
-        return rows;
-    } catch (error) {
-        console.error('[FATAL] Terjadi error saat menjalankan query getOpenJobs:', error);
-        throw error;
-    } 
-    finally {
-        await connection.end();
-    }
+  const [rows] = await pool.execute(sql, [karKode]);
+  return rows;
 }
 
 async function getDrivers(searchTerm) {
-    const connection = await mysql.createConnection(dbConfig);
-    const query = `%${searchTerm}%`;
-    
-    // Query untuk mencari driver berdasarkan kode atau nama
-    const sql = `
+  const query = `%${searchTerm}%`;
+  const sql = `
         SELECT kar_kode, kar_nama 
         FROM tkaryawan 
         WHERE 
@@ -84,17 +61,13 @@ async function getDrivers(searchTerm) {
         ORDER BY kar_nama ASC
     `;
 
-    try {
-        const [rows] = await connection.execute(sql, [query, query]);
-        return rows;
-    } finally {
-        await connection.end();
-    }
+  const [rows] = await pool.execute(sql, [query, query]);
+  return rows;
 }
 
 module.exports = {
-    getAllActive,
-    getHistoryJob,
-    getOpenJobsByKaryawan,
-    getDrivers
+  getAllActive,
+  getHistoryJob,
+  getOpenJobsByKaryawan,
+  getDrivers,
 };

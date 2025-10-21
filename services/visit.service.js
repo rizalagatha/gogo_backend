@@ -1,7 +1,6 @@
 // File: services/visit.service.js
 
-const mysql = require('mysql2/promise');
-const dbConfig = require('../config/db.config');
+const pool = require("../config/db.config");
 
 /**
  * Mengambil detail data kunjungan dari database berdasarkan ID.
@@ -10,12 +9,9 @@ const dbConfig = require('../config/db.config');
  * @returns {Promise<object|null>} - Mengembalikan objek detail kunjungan atau null jika tidak ditemukan.
  */
 async function getDetailById(visitId) {
-    // Membuat koneksi ke database
-    const connection = await mysql.createConnection(dbConfig);
-    
-    // Query yang diambil dari Delphi dan diubah menjadi parameterized query
-    // untuk keamanan (mencegah SQL Injection).
-    const sql = `
+  // Query yang diambil dari Delphi dan diubah menjadi parameterized query
+  // untuk keamanan (mencegah SQL Injection).
+  const sql = `
         SELECT 
             id,
             customer,
@@ -28,18 +24,13 @@ async function getDetailById(visitId) {
             id = ?
     `;
 
-    try {
-        // Menjalankan query dengan ID yang diberikan
-        const [rows] = await connection.execute(sql, [visitId]);
-        
-        // Mengembalikan baris pertama jika ada, jika tidak, null.
-        return rows.length > 0 ? rows[0] : null;
-    } finally {
-        // Selalu tutup koneksi setelah selesai
-        await connection.end();
-    }
+  // Menjalankan query dengan ID yang diberikan
+  const [rows] = await pool.execute(sql, [visitId]);
+
+  // Mengembalikan baris pertama jika ada, jika tidak, null.
+  return rows.length > 0 ? rows[0] : null;
 }
 
 module.exports = {
-    getDetailById
+  getDetailById,
 };

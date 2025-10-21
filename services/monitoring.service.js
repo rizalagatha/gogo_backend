@@ -1,13 +1,10 @@
 // services/monitoring.service.js
 
-const mysql = require('mysql2/promise');
-const dbConfig = require('../config/db.config');
+const pool = require("../config/db.config");
 
 async function getMonitoringData() {
-    const connection = await mysql.createConnection(dbConfig);
-    
-    // Query yang sudah dioptimalkan dari get_monitoring.php
-    const sql = `
+  // Query yang sudah dioptimalkan dari get_monitoring.php
+  const sql = `
         SELECT 
             k.kar_nama,
             IF(
@@ -26,13 +23,11 @@ async function getMonitoringData() {
         WHERE 
             k.kar_aktif = 0 AND k.kar_isdriver = 1
     `;
-    
-    const [rows] = await connection.execute(sql);
 
-    await connection.end();
-    return rows;
+  const [rows] = await pool.execute(sql);
+  return rows;
 }
 
 module.exports = {
-    getMonitoringData
+  getMonitoringData,
 };

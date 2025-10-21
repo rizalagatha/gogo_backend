@@ -1,12 +1,9 @@
 // services/job.service.js
 
-const mysql = require('mysql2/promise');
-const dbConfig = require('../config/db.config');
+const pool = require("../config/db.config");
 
 async function getBatalJobs() {
-    const connection = await mysql.createConnection(dbConfig);
-    
-    const sql = `
+  const sql = `
         SELECT
             pd_nomor,
             pd_customer,
@@ -21,18 +18,13 @@ async function getBatalJobs() {
         WHERE pd_isclosed = 4
         ORDER BY pd_tanggal DESC
     `;
-    
-    const [rows] = await connection.execute(sql);
 
-    await connection.end();
-    return rows;
+  const [rows] = await pool.execute(sql);
+  return rows;
 }
 
-// Tambahkan fungsi layanan job lain di sini nanti
 async function getCheckoutList(driverName) {
-    const connection = await mysql.createConnection(dbConfig);
-
-    const sql = `
+  const sql = `
         SELECT 
             pd_nomor,
             pd_tipejadwal,
@@ -47,16 +39,12 @@ async function getCheckoutList(driverName) {
         ORDER BY pd_tanggal
     `;
 
-    const [rows] = await connection.execute(sql, [driverName]);
-
-    await connection.end();
-    return rows;
+  const [rows] = await pool.execute(sql, [driverName]);
+  return rows;
 }
 
 async function getActiveJobs() {
-    const connection = await mysql.createConnection(dbConfig);
-
-    const sql = `
+  const sql = `
         SELECT
             pd_nomor,
             pd_customer,
@@ -75,16 +63,12 @@ async function getActiveJobs() {
         ORDER BY pd_tglkerja
     `;
 
-    const [rows] = await connection.execute(sql);
-
-    await connection.end();
-    return rows;
+  const [rows] = await pool.execute(sql);
+  return rows;
 }
 
 async function getJobDetail(nomorJob) {
-    const connection = await mysql.createConnection(dbConfig);
-
-    const sql = `
+  const sql = `
         SELECT 
             pdd_nomor,
             pdd_nourut,
@@ -95,15 +79,13 @@ async function getJobDetail(nomorJob) {
         WHERE pdd_nomor = ?
     `;
 
-    const [rows] = await connection.execute(sql, [nomorJob]);
-
-    await connection.end();
-    return rows;
+  const [rows] = await pool.execute(sql, [nomorJob]);
+  return rows;
 }
 
 module.exports = {
-    getBatalJobs,
-    getCheckoutList,
-    getActiveJobs,
-    getJobDetail
+  getBatalJobs,
+  getCheckoutList,
+  getActiveJobs,
+  getJobDetail,
 };

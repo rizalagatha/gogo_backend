@@ -1,18 +1,16 @@
 // services/notifications.service.js
 
-const mysql = require('mysql2/promise');
-const dbConfig = require('../config/db.config');
-const { get } = require('../routes/version.routes');
+const pool = require("../config/db.config");
 
 async function getNewNotifications(userKode) {
-    const connection = await mysql.createConnection(dbConfig);
-    
-    try {
-        // Mulai transaksi
-        await connection.beginTransaction();
+  const connection = await pool.getConnection();
 
-        // 1. SELECT: Ambil jadwal baru yang belum dinotifikasikan
-        const sql_select = `
+  try {
+    // Mulai transaksi
+    await connection.beginTransaction();
+
+    // 1. SELECT: Ambil jadwal baru yang belum dinotifikasikan
+    const sql_select = `
             SELECT kar_nama, tujuan, noplat, jamawal 
             FROM tkegiatan a 
             INNER JOIN tkaryawan b ON a.kar_kode = b.kar_kode
@@ -21,34 +19,35 @@ async function getNewNotifications(userKode) {
                 AND a.Tanggal = CURDATE()
                 AND a.kar_kode = ?
         `;
-        const [notifications] = await connection.execute(sql_select, [userKode, userKode]);
+    const [notifications] = await connection.execute(sql_select, [
+      userKode,
+      userKode,
+    ]);
 
-        // 2. UPDATE: Perbarui timestamp notifikasi terakhir untuk user ini
-        const sql_update = "UPDATE tkaryawan SET kar_tglnotification = NOW() WHERE kar_kode = ?";
-        await connection.execute(sql_update, [userKode]);
+    // 2. UPDATE: Perbarui timestamp notifikasi terakhir untuk user ini
+    const sql_update =
+      "UPDATE tkaryawan SET kar_tglnotification = NOW() WHERE kar_kode = ?";
+    await connection.execute(sql_update, [userKode]);
 
-        // Jika semua berhasil, commit transaksi
-        await connection.commit();
+    // Jika semua berhasil, commit transaksi
+    await connection.commit();
 
-        return notifications;
-
-    } catch (error) {
-        // Jika ada error, batalkan semua perubahan
-        await connection.rollback();
-        // Lemparkan error agar bisa ditangkap oleh controller
-        throw error;
-    } finally {
-        // Selalu tutup koneksi
-        await connection.end();
-    }
+    return notifications;
+  } catch (error) {
+    // Jika ada error, batalkan semua perubahan
+    await connection.rollback();
+    // Lemparkan error agar bisa ditangkap oleh controller
+    throw error;
+  } finally {
+    // Selalu kembalikan koneksi ke pool
+    connection.release();
+  }
 }
 
 async function getActiveJobsForNotification(karKode) {
-    const connection = await mysql.createConnection(dbConfig);
-    
-    // Query ini menghitung jumlah pekerjaan yang belum ditutup, tidak dibatalkan,
-    // dan jadwalnya adalah hari ini atau sebelumnya, untuk driver yang spesifik.
-    const sql = `
+  // Query ini menghitung jumlah pekerjaan yang belum ditutup, tidak dibatalkan,
+  // dan jadwalnya adalah hari ini atau sebelumnya, untuk driver yang spesifik.
+  const sql = `
         SELECT 
             COUNT(*) as job_count
         FROM tpermintaandriver a
@@ -60,15 +59,11 @@ async function getActiveJobsForNotification(karKode) {
             AND a.pd_tglkerja <= CURDATE()
     `;
 
-    try {
-        const [rows] = await connection.execute(sql, [karKode]);
-        return rows[0]; // Mengembalikan baris pertama (hasil COUNT)
-    } finally {
-        await connection.end();
-    }
+  const [rows] = await pool.execute(sql, [karKode]);
+  return rows[0]; // Mengembalikan baris pertama (hasil COUNT)
 }
 
 module.exports = {
-    getNewNotifications,
-    getActiveJobsForNotification
+  getNewNotifications,
+  getActiveJobsForNotification,
 };

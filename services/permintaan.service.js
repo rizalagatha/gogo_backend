@@ -1,34 +1,38 @@
 // services/permintaan.service.js
 
-const mysql = require('mysql2/promise');
-const dbConfig = require('../config/db.config');
+const pool = require("../config/db.config");
 
 // Fungsi untuk mengambil data yang dibutuhkan form input permintaan
 async function getFormData() {
-    const connection = await mysql.createConnection(dbConfig);
+  const connection = await pool.getConnection();
 
+  try {
     // 1. Get Server Time
     const [timeRows] = await connection.execute("SELECT NOW() as server_time");
     const serverTime = timeRows[0].server_time;
 
     // 2. Get Max Kode
-    const prefix = 'MND.' + new Date(serverTime).toISOString().slice(0, 7).replace('-', '') + '.';
-    const sql_kode = "SELECT IFNULL(MAX(CAST(RIGHT(pd_nomor, 4) AS UNSIGNED)), 0) as max_kode FROM tpermintaandriver WHERE pd_nomor LIKE ?";
-    const [kodeRows] = await connection.execute(sql_kode, [prefix + '%']);
-
-    await connection.end();
+    const prefix =
+      "MND." +
+      new Date(serverTime).toISOString().slice(0, 7).replace("-", "") +
+      ".";
+    const sql_kode =
+      "SELECT IFNULL(MAX(CAST(RIGHT(pd_nomor, 4) AS UNSIGNED)), 0) as max_kode FROM tpermintaandriver WHERE pd_nomor LIKE ?";
+    const [kodeRows] = await connection.execute(sql_kode, [prefix + "%"]);
 
     return {
-        serverTime: serverTime,
-        maxKode: kodeRows[0].max_kode
+      serverTime: serverTime,
+      maxKode: kodeRows[0].max_kode,
     };
+  } finally {
+    connection.release();
+  }
 }
 
 async function getSelectableJobs(searchTerm) {
-    const connection = await mysql.createConnection(dbConfig);
-    const query = `%${searchTerm}%`;
+  const query = `%${searchTerm}%`;
 
-    const sql = `
+  const sql = `
         SELECT
     pd_nomor,
     pd_userpeminta AS peminta,
@@ -57,52 +61,47 @@ WHERE
 ORDER BY pd_tglkerja DESC;
     `;
 
-    try {
-        // Kirim parameter query untuk setiap placeholder '?'
-        const [rows] = await connection.execute(sql, [
-            query, query, query, query, query, query, query
-        ]);
-        return rows;
-    } catch (error) {
-        console.error("Service Error:", error);
-        throw error;
-    }
-    finally {
-        await connection.end();
-    }
+  // Kirim parameter query untuk setiap placeholder '?'
+  const [rows] = await pool.execute(sql, [
+    query,
+    query,
+    query,
+    query,
+    query,
+    query,
+    query,
+  ]);
+  return rows;
 }
 
 async function submitPermintaan(permintaanData) {
-    const connection = await mysql.createConnection(dbConfig);
-
-    const sql = `
+  const sql = `
         INSERT INTO tpermintaandriver 
             (pd_nomor, pd_tanggal, pd_tipejadwal, pd_pengambilan, pd_customer, pd_pic, pd_uraian, pd_jamkerja, pd_status, pd_jamminta, pd_userpeminta, pd_tglkerja) 
         VALUES 
             (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const [result] = await connection.execute(sql, [
-        permintaanData.pd_nomor,
-        permintaanData.pd_tanggal,
-        permintaanData.pd_tipejadwal,
-        permintaanData.pd_pengambilan,
-        permintaanData.pd_customer,
-        permintaanData.pd_pic,
-        permintaanData.pd_uraian,
-        permintaanData.pd_jamkerja,
-        permintaanData.pd_status,
-        permintaanData.pd_jamminta,
-        permintaanData.pd_userpeminta,
-        permintaanData.pd_tglkerja
-    ]);
+  const [result] = await pool.execute(sql, [
+    permintaanData.pd_nomor,
+    permintaanData.pd_tanggal,
+    permintaanData.pd_tipejadwal,
+    permintaanData.pd_pengambilan,
+    permintaanData.pd_customer,
+    permintaanData.pd_pic,
+    permintaanData.pd_uraian,
+    permintaanData.pd_jamkerja,
+    permintaanData.pd_status,
+    permintaanData.pd_jamminta,
+    permintaanData.pd_userpeminta,
+    permintaanData.pd_tglkerja,
+  ]);
 
-    await connection.end();
-    return result;
+  return result;
 }
 
 module.exports = {
-    getFormData,
-    getSelectableJobs,
-    submitPermintaan
+  getFormData,
+  getSelectableJobs,
+  submitPermintaan,
 };
