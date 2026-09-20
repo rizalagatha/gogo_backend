@@ -19,7 +19,16 @@ async function getPasswordByKode(kode) {
   return rows.length > 0 ? rows[0] : null;
 }
 
+async function changePassword(kode, oldPassword, newPassword) {
+  // Satu query atomik: password hanya berubah jika kode + password lama cocok
+  const sql =
+    "UPDATE tkaryawan SET kar_password = ? WHERE kar_kode = ? AND kar_password = ?";
+  const [result] = await pool.execute(sql, [newPassword, kode, oldPassword]);
+  return result.affectedRows > 0;
+}
+
 module.exports = {
   login,
   getPasswordByKode,
+  changePassword,
 };
