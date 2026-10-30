@@ -15,12 +15,24 @@ async function getFormData(req, res) {
     });
   } catch (error) {
     console.error("Controller Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Gagal mengambil data form permintaan",
+    });
+  }
+}
+
+async function getSelectableJobs(req, res) {
+  const searchQuery = req.query.query || "";
+
+  try {
+    const jobList = await permintaanService.getSelectableJobs(searchQuery);
+    res.json({ success: true, data: jobList });
+  } catch (error) {
+    console.error("Controller Error:", error);
     res
       .status(500)
-      .json({
-        success: false,
-        message: "Gagal mengambil data form permintaan",
-      });
+      .json({ success: false, message: "Gagal mengambil daftar pekerjaan" });
   }
 }
 

@@ -1,3 +1,5 @@
+// services/permintaan.service.js
+
 const pool = require("../config/db.config");
 
 const LOCK_NAME = "gogo_permintaan_driver_nomor";
@@ -26,6 +28,51 @@ async function generateNomor(conn) {
 
   const next = Number(rows[0].max_kode) + 1;
   return prefix + String(next).padStart(4, "0");
+}
+
+async function getSelectableJobs(searchTerm) {
+  const query = `%${searchTerm}%`;
+
+  const sql = `
+        SELECT
+    pd_nomor,
+    pd_userpeminta AS peminta,
+    pd_pengambilan AS pengambilan,
+    pd_pic AS pic,
+    pd_customer AS customer,
+    pd_uraian AS uraian,
+    pd_tipejadwal AS tipeJadwal,
+    DATE_FORMAT(pd_tglkerja, '%d-%m-%Y') AS tglKerja,
+    pd_jamkerja AS jamKerja,
+    IF(pd_isclosed = 0, 'Belum', 'Selesai') AS status,
+    pd_driver AS driver
+FROM tpermintaandriver
+WHERE
+    pd_isclosed = 0
+    AND pd_tglkerja <= CURDATE()
+    AND (
+        pd_nomor LIKE ? OR
+        pd_userpeminta LIKE ? OR
+        pd_pengambilan LIKE ? OR
+        pd_customer LIKE ? OR
+        pd_pic LIKE ? OR
+        pd_uraian LIKE ? OR
+        pd_tipejadwal LIKE ?
+    )
+ORDER BY pd_tglkerja DESC;
+    `;
+
+  // Kirim parameter query untuk setiap placeholder '?'
+  const [rows] = await pool.execute(sql, [
+    query,
+    query,
+    query,
+    query,
+    query,
+    query,
+    query,
+  ]);
+  return rows;
 }
 
 async function submitPermintaan(data) {
